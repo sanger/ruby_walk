@@ -20,7 +20,7 @@ class Object
       options[self.class] or options[self.class.name.downcase] or options[self.class.name.downcase.to_sym] or (defined?(super)? super(options) : [])
     end
 
-  def _walk_objects(options, already_walked={})
+  def _walk_objects(options, already_walked={}, &block)
     walked = []
     find_methods_to_walk(options).each do |action|
       walked += case action
