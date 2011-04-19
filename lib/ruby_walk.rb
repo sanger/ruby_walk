@@ -16,13 +16,18 @@ class Object
 
 
   private
-    def find_methods_to_walk(options)
-      options[self.class] or options[self.class.name.downcase] or options[self.class.name.downcase.to_sym] or (defined?(super)? super(options) : [])
+  def _default_methods_to_walk()
+    []
+  end
+    def _find_methods_to_walk(options)
+      options[self.class] or options[self.class.name.downcase] or options[self.class.name.downcase.to_sym] or (defined?(super)? super(options) : _default_methods_to_walk())
     end
 
   def _walk_objects(options, already_walked={}, &block)
     walked = []
-    find_methods_to_walk(options).each do |action|
+    methods = _find_methods_to_walk(options)
+    methods = [methods] unless methods.respond_to?(:each)
+    methods.each do |action|
       walked += case action
         when Proc
           case action.arity
