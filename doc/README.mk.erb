@@ -35,10 +35,15 @@ To get all the final value of a Hash
 
 <% example = {:a => 1, :b => 2, :c => {:a => 3, :d => 5}} %>
 <% to_eval = %Q{#{example.inspect}.walk_objects(Hash => :values){ |e| e.is_a?(Hash) ? [] : e }} %>
-<%=  to_eval%>
->>
-<%=  eval(to_eval).inspect%>
+    <%=  to_eval%>
+    > <%=  eval(to_eval).inspect%>
 
 
 ### Walking over a list
-by default a List walk over its elements. However you can still 
+by default a List walk over its elements and excludes itself.
+
+
+<% example = [[1,2], [3,2], [[5,6, [7,8]]]] %>
+<% to_eval = %Q{#{example.inspect}.walk_objects(){ |x| x*10 }} %>
+    <%=  to_eval%>
+    > <%=  eval(to_eval).inspect%>              

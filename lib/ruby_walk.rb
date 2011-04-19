@@ -51,7 +51,7 @@ class Object
 end
 
 class Array
-  def walk_objects(options, already_walked={}, &block)
+  def walk_objects(options={}, already_walked={}, &block)
     map {|e| e.walk_objects(options, already_walked,&block)}.flatten
   end
 end
