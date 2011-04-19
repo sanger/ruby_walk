@@ -1,6 +1,14 @@
 
 class Object
   def walk_objects(options= {}, already_walked={}, &block)
+    if options.is_a?(Array)
+      if options.size == 0
+      return walk_objects({}, already_walked, &block)
+      else
+      return walk_objects(options.first, already_walked, &block).walk_objects(options[1..-1], already_walked, &block)
+      end
+    end
+
     # we should open the Array class, but for some reason , it doesn't work in Rails ???
     return map {|e| e.walk_objects(options, already_walked,&block)}.flatten if is_a?(Array)
     # we compute a key to store if an object has already been loaded or not.can be the idea for transiant object
