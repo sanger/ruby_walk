@@ -1,6 +1,8 @@
 
 class Object
   def walk_objects(options= {}, already_walked={}, &block)
+    # we should open the Array class, but for some reason , it doesn't work in Rails ???
+    return map {|e| e.walk_objects(options, already_walked,&block)}.flatten if is_a?(Array)
     # we compute a key to store if an object has already been loaded or not.can be the idea for transiant object
     key = _compute_walk_key
     return [] if already_walked.include?(key)
@@ -19,15 +21,23 @@ class Object
   def _default_methods_to_walk()
     []
   end
-    def _find_methods_to_walk(options)
-      options[self.class] or options[self.class.name.downcase] or options[self.class.name.downcase.to_sym] or (defined?(super)? super(options) : _default_methods_to_walk())
+  def _find_methods_to_walk(options)
+    _find_methods_to_walk_for_class(self.class, options).uniq
+  end
+
+  def _find_methods_to_walk_for_class(klass,options)
+    methods = options[klass] || options[klass.name.downcase] || options[klass.name.downcase.to_sym] || _default_methods_to_walk()
+    methods = [methods].flatten # create a new list
+    if !methods.delete(:skip_super) && klass.superclass
+      methods.concat(_find_methods_to_walk_for_class(klass.superclass, options))
     end
+    methods
+
+  end
 
   def _walk_objects(options, already_walked={}, &block)
     walked = []
-    methods = _find_methods_to_walk(options)
-    methods = [methods] unless methods.respond_to?(:each)
-    methods.each do |action|
+    _find_methods_to_walk(options).each do |action|
       walked += case action
         when Proc
           case action.arity
@@ -37,10 +47,10 @@ class Object
             action.call(&block)
           end
         when Symbol
-          self.send(action).walk_objects(options, already_walked, &block)
+          self.send(action)
         else 
           []
-        end
+        end.walk_objects(options, already_walked, &block)
     end
     walked
   end
@@ -50,21 +60,13 @@ class Object
 
 end
 
-class Array
-  def walk_objects(options={}, already_walked={}, &block)
-    map {|e| e.walk_objects(options, already_walked,&block)}.flatten
-  end
-end
-
 begin
+  class ActiveRecord::Base
+    def _compute_walk_key()
+      # the idea of the object doesn't work, because an active record can be loaded many times into different object
+      key = [self.class.name, self.id]
+    end
 
-#TODO test if ActiveRecord exists or not
-class ActiveRecord
-  def _compute_walk_key()
-    # the idea of the object doesn't work, because an active record can be loaded many times into different object
-    key = [self.class.name, self.id]
   end
-
-end
-
+rescue
 end
