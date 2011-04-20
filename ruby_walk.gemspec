@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
   s.authors     = ["Maxime Bourget"]
   s.email       = ["maxime.bourget@gmail.com"]
   s.homepage    = ""
-  s.summary     = %q{walk amongs dependencies of an object.}
+  s.summary     = %q{Provide a map like feature to a arbitrary tree.}
   s.description = %q{call a block recursively on every object "dependencies" specified as a parameter. Can be use to iterate over a model or just generate a list of the dependencies.}
 
   s.rubyforge_project = "ruby_walk"

@@ -1,8 +1,7 @@
 
 # Introduction
-This gem provides the ability to *walk* recursively amongs an object and its dependencies, ie executing a optional block and storing the result in a flat list.
-The dependecies are give as hash associating a class and its dependencies (a list of symbols to call on the object).
-The `walk_objects` methods can be used either to generate a flat list of an object and its dependencies or to just to iterate over them.
+This gem provides the *walk_objets* function, ie a map like function to any arbitrary tree. This can be used either to generate a flat list of an object and its dependencies or to just to iterate recursively over them. Each object is only *walked* once,
+The tree is explored using a hash describing for each class, which methods to call. This can be either a symbol, a list of symbol or Proc to execute.
 
 ## Examples
 Lets consider a Rails like example
@@ -21,7 +20,7 @@ Lets consider a Rails like example
 will generate a list containing, the user, all its posts, and all of the associated comments
 
 
-## Filtering
+### Filtering
 to filter the element to be walked use a block. If a block return `nil` then element and its dependencies are skiped. If the result is `[]` the element is not returned in the result but its dependencies are walked.
 
 With the previous example, to get only the list of comments
@@ -62,4 +61,19 @@ You can also use pass an array of hash to the walk methods
 
 user.walk_objects([{:user => :posts, :posts =>:comments}, {Comment => :users}]) { |e| e.is_a?(Comment) ? e : [])
 
-### Walking over a hash
+### Inheritance
+By default the methods described in the "model tree" for a subclass are merged with the superclass. To avoid that, use the special method `:skip_super`.
+
+    class A
+      def f
+      end
+    end
+    class B < A
+      def g
+      end
+    end
+
+Walking with the parameter `{ :a => :f, :b=> :g }` will pull f, and g for the class B.
+To pull only g , use `{ :a => :f, :b=> [:g, :skip_super] }`.
+
+
