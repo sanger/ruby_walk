@@ -56,7 +56,7 @@ Imagine in the previous example , you want to walk through the users for each co
 will cycle trough users and pull every posts from the users which had left a comment on our post.
 Instead chain 2 walks.
 
-:    useruser.walk_objects(:user => :posts, :posts =>:comments) { |e| e.is_a?(Comment) ? e : []).walk_objects(Comment => :users)
+:    user.walk_objects(:user => :posts, :posts =>:comments) { |e| e.is_a?(Comment) ? e : []).walk_objects(Comment => :users)
 Only the root user, will have the posts walked through.
 
 You can also use pass an array of hash to the walk methods
