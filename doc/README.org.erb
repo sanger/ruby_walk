@@ -25,7 +25,7 @@ to filter the element to be walked use a block. If a block return =nil= then ele
 
 With the previous example, to get only the list of comments
 
-    user.walk_objects(:user => :posts, :posts =>:comments) { |e| e.is_a?(Comment) ? e : [])
+:    user.walk_objects(:user => :posts, :posts =>:comments) { |e| e.is_a?(Comment) ? e : [])
 
 ** Walking over a hash
 use  =:keys= and or =:values=.
@@ -51,16 +51,17 @@ You might need to have different dependencies for the same class depending of th
 
 Imagine in the previous example , you want to walk through the users for each comments. Adding =Comment => :users= like this
 
-    user.walk_objects(:user => :posts, :posts =>:comments, Comment => :users) { |e| e.is_a?(Comment) ? e : [])
+:    user.walk_objects(:user => :posts, :posts =>:comments, Comment => :users) { |e| e.is_a?(Comment) ? e : [])
 
 will cycle trough users and pull every posts from the users which had left a comment on our post.
 Instead chain 2 walks.
-user.walk_objects(:user => :posts, :posts =>:comments) { |e| e.is_a?(Comment) ? e : []).walk_objects(Comment => :users)
+
+:    useruser.walk_objects(:user => :posts, :posts =>:comments) { |e| e.is_a?(Comment) ? e : []).walk_objects(Comment => :users)
 Only the root user, will have the posts walked through.
 
 You can also use pass an array of hash to the walk methods
 
-user.walk_objects([{:user => :posts, :posts =>:comments}, {Comment => :users}]) { |e| e.is_a?(Comment) ? e : [])
+:    user.walk_objects([{:user => :posts, :posts =>:comments}, {Comment => :users}]) { |e| e.is_a?(Comment) ? e : [])
 
 ** Inheritance
 By default the methods described in the "model tree" for a subclass are merged with the superclass. To avoid that, use the special method =:skip_super=.
