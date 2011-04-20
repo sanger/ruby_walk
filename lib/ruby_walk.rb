@@ -1,4 +1,3 @@
-
 class Object
   def walk_objects(options= {}, already_walked={}, &block)
     if options.is_a?(Array)
@@ -11,6 +10,7 @@ class Object
 
     # we should open the Array class, but for some reason , it doesn't work in Rails ???
     return map {|e| e.walk_objects(options, already_walked,&block)}.flatten if is_a?(Array)
+
     # we compute a key to store if an object has already been loaded or not.can be the idea for transiant object
     key = _compute_walk_key
     return [] if already_walked.include?(key)
@@ -25,7 +25,7 @@ class Object
   end
 
 
-  private
+  #private
   def _default_methods_to_walk()
     []
   end
@@ -43,7 +43,7 @@ class Object
 
   end
 
-  def _walk_objects(options, already_walked={}, &block)
+  def _walk_objects(options, already_walked, &block)
     walked = []
     _find_methods_to_walk(options).each do |action|
       walked += case action
@@ -68,7 +68,7 @@ class Object
 
 end
 
-begin
+if defined?(ActiveRecord)
   class ActiveRecord::Base
     def _compute_walk_key()
       # the idea of the object doesn't work, because an active record can be loaded many times into different object
@@ -76,5 +76,8 @@ begin
     end
 
   end
-rescue
+
+  class ActiveRecord::Associations::AssociationProxy
+    delegate :_compute_walk_key, :to => :target
+  end
 end
