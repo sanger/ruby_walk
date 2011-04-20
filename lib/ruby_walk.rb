@@ -1,3 +1,4 @@
+
 class Object
   def walk_objects(options= {}, already_walked={}, &block)
     if options.is_a?(Array)
@@ -13,6 +14,7 @@ class Object
 
     # we compute a key to store if an object has already been loaded or not.can be the idea for transiant object
     key = _compute_walk_key
+    #puts "walking #{key.inspect}"
     return [] if already_walked.include?(key)
     already_walked[key] = true
 
@@ -25,7 +27,7 @@ class Object
   end
 
 
-  #private
+  private
   def _default_methods_to_walk()
     []
   end
@@ -43,7 +45,7 @@ class Object
 
   end
 
-  def _walk_objects(options, already_walked, &block)
+  def _walk_objects(options, already_walked={}, &block)
     walked = []
     _find_methods_to_walk(options).each do |action|
       walked += case action
