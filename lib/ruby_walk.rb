@@ -1,16 +1,16 @@
 
 class Object
-  def walk_objects(options= {}, already_walked={}, &block)
+  def walk_objects(options= {}, already_walked={}, parent=nil, &block)
     if options.is_a?(Array)
       if options.size == 0
-      return walk_objects({}, already_walked, &block)
+      return walk_objects({}, already_walked, parent, &block)
       else
-      return walk_objects(options.first, already_walked, &block).walk_objects(options[1..-1], already_walked, &block)
+      return walk_objects(options.first, already_walked, parent, &block).walk_objects(options[1..-1], already_walked, parent, &block)
       end
     end
 
     # we should open the Array class, but for some reason , it doesn't work in Rails ???
-    return map {|e| e.walk_objects(options, already_walked,&block)}.flatten if is_a?(Array)
+    return map {|e| e.walk_objects(options, already_walked, parent, &block)}.flatten if is_a?(Array)
 
     # we compute a key to store if an object has already been loaded or not.can be the idea for transiant object
     key = _compute_walk_key
@@ -20,10 +20,18 @@ class Object
 
     #we skip object which the block has return nil
     #but we propagate those which return []
-    self_object = block ? block[self] : self
+    
+    self_object = if block 
+                    case block.arity
+                    when 1 then block[self] 
+                    when 2 then block[self,parent]
+                    end
+                  else
+                    self
+                  end
     return [] if self_object.nil?
 
-    (_walk_objects(options, already_walked, &block ). << self_object).flatten
+    (_walk_objects(options, already_walked, parent, &block ). << self_object).flatten
   end
 
 
@@ -45,7 +53,7 @@ class Object
 
   end
 
-  def _walk_objects(options, already_walked={}, &block)
+  def _walk_objects(options, already_walked={}, parent=nil, &block)
     walked = []
     _find_methods_to_walk(options).each do |action|
       walked += case action
@@ -60,7 +68,7 @@ class Object
           self.send(action)
         else 
           []
-        end.walk_objects(options, already_walked, &block)
+        end.walk_objects(options, already_walked, self, &block)
     end
     walked
   end
