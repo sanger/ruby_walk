@@ -1,16 +1,20 @@
 
 class Object
-  def walk_objects(options= {}, already_walked={}, parent=nil, &block)
+  def walk_objects(options= {}, already_walked={}, parent_and_index=nil, &block)
     if options.is_a?(Array)
       if options.size == 0
-      return walk_objects({}, already_walked, parent, &block)
+      return walk_objects({}, already_walked, parent_and_index, &block)
       else
-      return walk_objects(options.first, already_walked, parent, &block).walk_objects(options[1..-1], already_walked, parent, &block)
+      return walk_objects(options.first, already_walked, parent_and_index, &block).walk_objects(options[1..-1], already_walked, parent_and_index, &block)
       end
     end
 
     # we should open the Array class, but for some reason , it doesn't work in Rails ???
-    return map {|e| e.walk_objects(options, already_walked, parent, &block)}.flatten if is_a?(Array)
+    if is_a?(Array)
+      parent = parent_and_index && parent_and_index[0]
+      max_index = size-1
+      return each_with_index.map {|e, i| e.walk_objects(options, already_walked, [parent,i, max_index], &block)}.flatten
+    end
 
     # we compute a key to store if an object has already been loaded or not.can be the idea for transiant object
     key = _compute_walk_key
@@ -24,14 +28,17 @@ class Object
     self_object = if block 
                     case block.arity
                     when 1 then block[self] 
-                    when 2 then block[self,parent]
+                    when 2 then block[self,parent_and_index[0]]
+                    when 3 then block[self, *parent_and_index[0,3]] # parent + index
+                    when 4 then block[self, *parent_and_index[0,4]] # parent + index + max_index
+                    else raise RuntimeError, "wrong number of argument"
                     end
                   else
                     self
                   end
     return [] if self_object.nil?
 
-    (_walk_objects(options, already_walked, parent, &block ). << self_object).flatten
+    (_walk_objects(options, already_walked, parent_and_index, &block ). << self_object).flatten
   end
 
 
@@ -53,9 +60,11 @@ class Object
 
   end
 
-  def _walk_objects(options, already_walked={}, parent=nil, &block)
+  def _walk_objects(options, already_walked={}, parent_and_index=nil, &block)
     walked = []
-    _find_methods_to_walk(options).each do |action|
+    to_walk = _find_methods_to_walk(options)
+    max_index =to_walk
+    to_walk.each_with_index do |action, index|
       walked += case action
         when Proc
           case action.arity
@@ -68,7 +77,7 @@ class Object
           self.send(action)
         else 
           []
-        end.walk_objects(options, already_walked, self, &block)
+        end.walk_objects(options, already_walked, [self, index, max_index], &block)
     end
     walked
   end
