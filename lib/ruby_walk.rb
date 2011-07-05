@@ -77,7 +77,7 @@ class Object
           self.send(action)
         else 
           []
-        end.walk_objects(options, already_walked, [self, index, max_index], &block)
+        end.walk_objects(options, already_walked, [self, nil, nil], &block)
     end
     walked
   end
