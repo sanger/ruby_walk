@@ -1,4 +1,13 @@
 
+# this class is used to wrap an object and don't propagate to its children
+# In case different can cut or not, the cut object is not register as a walked object
+# This can cause performance issue
+class Cut
+  attr_reader :object
+  def initialize(*object)
+    @object = object
+  end
+end
 class Object
   def walk_objects(options= {}, already_walked={}, parent_and_index=nil, &block)
     if options.is_a?(Array)
@@ -19,8 +28,7 @@ class Object
     # we compute a key to store if an object has already been loaded or not.can be the idea for transiant object
     key = _compute_walk_key
     #puts "walking #{key.inspect}"
-    return [] if already_walked.include?(key)
-    already_walked[key] = true
+    return [] if already_walked[key] == true
 
     #we skip object which the block has return nil
     #but we propagate those which return []
@@ -36,7 +44,16 @@ class Object
                   else
                     self
                   end
+    # Hack to be able to process cut object only once, but do them properly if needed
+    # TODO do it better
+    if self_object.is_a?(Cut)
+      return [] if  already_walked[key]== Cut
+
+      already_walked[key] = Cut
+      return self_object.object
+    end
     return [] if self_object.nil?
+    already_walked[key] = true
 
     (_walk_objects(options, already_walked, parent_and_index, &block ). << self_object).flatten
   end
