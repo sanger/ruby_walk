@@ -2,10 +2,12 @@
 # this class is used to wrap an object and don't propagate to its children
 # In case different can cut or not, the cut object is not register as a walked object
 # This can cause performance issue
-class Cut
-  attr_reader :object
-  def initialize(*object)
-    @object = object
+module RubyWalk
+  class Cut
+    attr_reader :object
+    def initialize(*object)
+      @object = object
+    end
   end
 end
 class Object
@@ -33,7 +35,7 @@ class Object
 
     __object_walked, __edge_walked = [key, edge_key].map { |k| already_walked[k] }
     object_walked = ( __object_walked == true)
-    object_cut = __object_walked == Cut
+    object_cut = __object_walked == RubyWalk::Cut
     process_edge = block and block.arity > 1
     edge_walked = __edge_walked or not process_edge
 
@@ -58,13 +60,13 @@ class Object
                     self
                   end
     case self_object
-    when Cut
+    when RubyWalk::Cut
       # no propagation
       if object_walked or (object_cut and edge_walked)
         []
       else
         #we return the real object, and mark it as already cut
-        already_walked[key] = Cut
+        already_walked[key] = RubyWalk::Cut
         [self_object.object]
       end
     when nil
