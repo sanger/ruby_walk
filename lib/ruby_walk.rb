@@ -16,7 +16,7 @@ class Object
       if options.size == 0
       return walk_objects({}, already_walked, parent_and_index, &block)
       else
-      return walk_objects(options.first, already_walked, parent_and_index, &block).walk_objects(options[1..-1], already_walked, parent_and_index, &block)
+      return walk_objects(options.first, already_walked, parent_and_index, &block).walk_objects(options[1..-1], {}, nil, &block)
       end
     end
 
