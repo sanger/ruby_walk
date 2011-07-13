@@ -89,10 +89,11 @@ To pull only g , use ={ :a => :f, :b=> [:g, :skip_super] }=.
 ** Walking over edges
 by passing extra arguments to a block, you can get usefull edge information as:
  - parent
- - index : (starting at 1). rank of the current object within parent
+ - index : rank of the current object within parent
  - max_index : number total of sibbling
 
-At the moment Array are not considered as a parent and set the parent to nil.
+At the moment Array are not considered as a parent and set the parent of the 
+Array if it exists.
 
-:     > %w{a b c d}.walk_objects { |x, parent, index| [x, parent, index]}
-:     ["a", nil, 0, "b", nil, 1, "c", nil, 2, "d", nil, 3]  
+:    > %w{a b c d}.walk_objects { |x, parent, index| {x => index }}
+:    [{"a"=>0}, {"b"=>1}, {"c"=>2}, {"d"=>3}]  
