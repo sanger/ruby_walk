@@ -81,3 +81,14 @@ Walking with the parameter ={ :a => :f, :b=> :g }= will pull f, and g for the cl
 To pull only g , use ={ :a => :f, :b=> [:g, :skip_super] }=.
 
 
+* Advanced
+** Walking over edges
+by passing extra arguments to a block, you can get usefull edge information as:
+ - parent
+ - index : (starting at 1). rank of the current object within parent
+ - max_index : number total of sibbling
+
+At the moment Array are not considered as a parent and set the parent to nil.
+
+:     > %w{a b c d}.walk_objects { |x, parent, index| [x, parent, index]}
+:     ["a", nil, 0, "b", nil, 1, "c", nil, 2, "d", nil, 3]  
