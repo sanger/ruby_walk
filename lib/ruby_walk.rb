@@ -36,8 +36,8 @@ class Object
     __object_walked, __edge_walked = [key, edge_key].map { |k| already_walked[k] }
     object_walked = ( __object_walked == true)
     object_cut = __object_walked == RubyWalk::Cut
-    process_edge = block and block.arity > 1
-    edge_walked = __edge_walked or not process_edge
+    process_edge = (block and block.arity > 1)
+    edge_walked = (__edge_walked or not process_edge)
 
 
 
@@ -131,7 +131,9 @@ end
 if defined?(ActiveRecord)
   class ActiveRecord::Base
     def _compute_walk_key(parent=nil)
-      # the idea of the object doesn't work, because an active record can be loaded many times into different object
+      # the id of the object doesn't work,
+      # because an active record can be loaded many times into different object
+      # so we have to use ActiveRecord#id (and class)
       key = [self.class.name, self.id, parent ? parent._compute_walk_key : nil].compact
     end
 
